@@ -5,6 +5,8 @@ const {
     get_recomendasi_wisata,
     get_detail_wisata,
     get_all_wisata_byDesawisata,
+    get_ulasan_wisata,
+    add_ulasan_wisata,
 
     //admin
     get_all_wisata_byAdmin,
@@ -21,6 +23,8 @@ const {
 router.get("/wisata/get_all", get_all_wisata);
 router.get("/wisata/get_all/:id_desaWisata", get_all_wisata_byDesawisata);
 router.get("/wisata/detail/:id_wisata", get_detail_wisata);
+router.get("/wisata/ulasan/:id_wisata", get_ulasan_wisata);
+router.post("/wisata/add/ulasan/:id_wisata", add_ulasan_wisata);
 router.post("/wisata/recomend", get_recomendasi_wisata);
 
 //admin

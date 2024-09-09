@@ -62,7 +62,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'tbl_DesaWisata',
-    tableName: 'tbl_DesaWisata',
+    tableName: 'tbl_desaWisata',
   });
   return tbl_DesaWisata;
 };

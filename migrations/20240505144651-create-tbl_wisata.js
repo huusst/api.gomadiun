@@ -63,6 +63,9 @@ module.exports = {
       jumlah_fasilitas: {
         type: Sequelize.INTEGER,
       },
+      rate: {
+        type: Sequelize.DOUBLE(10, 2),
+      },
       kontak_person_destinasi: {
         type: Sequelize.STRING
       },
@@ -71,6 +74,9 @@ module.exports = {
       }, 
       status_wisata: {
         type: Sequelize.ENUM('Pribadi', 'Bumdes', 'Pemda'),
+      },
+      jenis_wisata: {
+        type: Sequelize.ENUM('buatan', 'alam', 'religi', 'senibudaya'),
       },
       status_verifikasi: {
         type: Sequelize.ENUM('verified', 'unverified'),

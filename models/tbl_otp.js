@@ -26,7 +26,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'tbl_Otp',
-    tableName: 'tbl_Otp',
+    tableName: 'tbl_otp',
   });
   return tbl_Otp;
 };

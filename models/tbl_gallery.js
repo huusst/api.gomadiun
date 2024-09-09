@@ -34,7 +34,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'tbl_Gallery',
-    tableName: 'tbl_Gallery',
+    tableName: 'tbl_gallery',
   });
   return tbl_Gallery;
 };

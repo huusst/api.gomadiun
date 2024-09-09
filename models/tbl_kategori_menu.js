@@ -32,7 +32,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'tbl_Kategori_menu',
-    tableName: 'tbl_Kategori_menu',
+    tableName: 'tbl_kategori_menu',
   });
   return tbl_Kategori;
 };

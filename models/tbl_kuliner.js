@@ -81,7 +81,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'tbl_Kuliner',
-    tableName: 'tbl_Kuliner',
+    tableName: 'tbl_kuliner',
   });
   return tbl_Kuliner;
 };

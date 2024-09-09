@@ -42,7 +42,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'tbl_Paket_homestay',
-    tableName: 'tbl_Paket_homestay'
+    tableName: 'tbl_paket_homestay'
   });
   return tbl_Paket_homestay;
 };

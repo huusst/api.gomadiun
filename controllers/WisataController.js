@@ -1,14 +1,17 @@
 const db = require('../models');
 const tbl_Wisata = db.tbl_Wisata;
+const tbl_wisatawan = db.tbl_Wisatawan;
 const tbl_Admin = db.tbl_Admin;
 const tbl_DesaWisata = db.tbl_DesaWisata;
 const tbl_fasilitas_wisata = db.tbl_fasilitas_wisata;
+const tbl_ulasan = db.tbl_ulasan;
 const jwt = require('jsonwebtoken');
 const { Op } = require('sequelize');
 const multer = require('multer');
 const moment = require('moment-timezone');
 const path = require('path');
 const fs = require('fs');
+const Sequelize = require('sequelize');
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -42,6 +45,11 @@ const upload = multer({
 
 const get_recomendasi_wisata = async (req, res) => {
   try {
+
+    const {
+      filter = {},
+    } = req.query;
+
     const {
       dana,
       jumlah,
@@ -51,7 +59,90 @@ const get_recomendasi_wisata = async (req, res) => {
       return res.status(400).send({ error: "Dana is required" });
     }
 
-    const data = await tbl_Wisata.findAndCountAll({ where: { status_verifikasi: 'verified' } });
+    const whereClause = {
+      [Op.and]: [
+        { status_verifikasi: 'verified' }
+      ]
+    };
+
+    if (filter.rate) {
+      const filterRate = Array.isArray(filter.rate)
+        ? filter.rate
+        : filter.rate.split(",").map(Number); // Convert to numbers
+    
+      if (filterRate.length > 0) {
+        console.log(filterRate);
+    
+        // Initialize the range variables
+        let minRange = Number.MAX_VALUE;
+        let maxRange = Number.MIN_VALUE;
+    
+        // Determine the range based on the filter values
+        filterRate.forEach((rate) => {
+          if (rate === 3) {
+            minRange = Math.min(minRange, 2.8);
+            maxRange = Math.max(maxRange, 3.7);
+          } else if (rate === 5) {
+            minRange = Math.min(minRange, 4.8);
+            maxRange = Math.max(maxRange, 5);
+          } else if (rate === 5) {
+            minRange = Math.min(minRange, 4.8);
+            maxRange = Math.max(maxRange, 5);
+          } else if (rate === 5) {
+            minRange = Math.min(minRange, 4.8);
+            maxRange = Math.max(maxRange, 5);
+          } else if (rate === 5) {
+            minRange = Math.min(minRange, 4.8);
+            maxRange = Math.max(maxRange, 5);
+          } else if (rate === 5) {
+            minRange = Math.min(minRange, 4.8);
+            maxRange = Math.max(maxRange, 5);
+          } else if (rate === 5) {
+            minRange = Math.min(minRange, 4.8);
+            maxRange = Math.max(maxRange, 5);
+          }
+        });
+    
+        // Add the range condition to the whereClause
+        if (minRange !== Number.MAX_VALUE && maxRange !== Number.MIN_VALUE) {
+          whereClause[Op.and].push({
+            rate: {
+              [Sequelize.Op.between]: [minRange, maxRange],
+            },
+          });
+        }
+      } else {
+        console.log("Empty filter.rate");
+        return res.status(404).json({
+          success: false,
+          message: "Data Tidak Ditemukan",
+        });
+      }
+    }
+
+    if (filter.jenis_wisata) {
+      const filterjenis_wisata = Array.isArray(filter.jenis_wisata)
+        ? filter.jenis_wisata
+        : filter.jenis_wisata.split(",");
+
+      if (filterjenis_wisata.length > 0) {
+        whereClause[Op.and].push({
+          jenis_wisata: {
+            [Sequelize.Op.or]: filterjenis_wisata.map((name) => ({
+              [Sequelize.Op.like]: `%${name.trim()}%`,
+            }))
+          }
+        });
+      } else {
+        console.log("Empty filter.kelas_penginapan");
+        return res.status(404).json({
+          success: false,
+          message: "Data Tidak Di Temukan",
+        });
+      }
+    }
+    
+    const data = await tbl_Wisata.findAndCountAll({ where: whereClause });
 
     if (data.count === 0) {
       return res.status(422).json({
@@ -66,7 +157,7 @@ const get_recomendasi_wisata = async (req, res) => {
     function normalisasiData(matrix) {
       let dataPencocokan = [];
       let dataNormalisasi = [];
-  
+
       for (let row of matrix) {
         let rowDataPencocokan = [
           row[0],
@@ -123,7 +214,9 @@ const get_recomendasi_wisata = async (req, res) => {
     let destinations = filteredData.map((dest, index) => ({
       ...dest.dataValues,
       recommended: index === nilai_perangkingan.indexOf(Math.max(...nilai_perangkingan)),
-      nilai_perangkingan: nilai_perangkingan[index]
+      nilai_perangkingan: nilai_perangkingan[index],
+      rate: parseFloat(dest.rate).toFixed(1),
+      jumlah_ulasan: filteredData.length,
     }));
 
     // Urutkan berdasarkan nilai_perangkingan tertinggi ke terendah
@@ -172,7 +265,7 @@ const get_all_wisata = async (req, res) => {
     };
 
     const orderClause = [
-      ['total_pengunjung_destinasi', order.toUpperCase() === 'DESC' ? 'DESC' : 'ASC']
+      ['rate', order.toUpperCase() === 'DESC' ? 'DESC' : 'ASC']
     ];
 
 
@@ -201,17 +294,31 @@ const get_all_wisata = async (req, res) => {
       });
     }
 
-    const result = {
-      success: true,
-      message: "Sukses mendapatkan data",
-      data: data.rows.map((items) => ({
+
+    const results = await Promise.all(data.rows.map(async (items) => {
+
+
+      const data = await tbl_ulasan.findAndCountAll({
+        where: { id_wisata: items.id_wisata },
+      });
+
+      return {
         id: items.id_wisata,
         nama: items.nama_destinasi,
         kategori: "Wisata",
         harga: items.harga_tiket,
         pengunjung: items.total_pengunjung_destinasi,
+        rate: parseFloat(items.rate).toFixed(1),
+        jumlah_ulasan: data.count,
         imageUrl: items.sampul_destinasi,
-      })),
+      };
+    }));
+
+
+    const result = {
+      success: true,
+      message: "Sukses mendapatkan data",
+      data: results,
       pages: {
         total: data.count,
         per_page: parseInt(limit, 10) || data.count,
@@ -284,6 +391,7 @@ const get_detail_wisata = async (req, res) => {
         alamat: data.alamat_destinasi,
         link_iframe: data.maps_destinasi,
         status_jalan: data.status_jalan,
+        rate: parseFloat(data.rate).toFixed(1),
         jenis_kendaraan: data.jenis_kendaraan,
         imageUrl: data.sampul_destinasi,
         data_fasilitas
@@ -393,6 +501,185 @@ const get_all_wisata_byDesawisata = async (req, res) => {
     }
 
     res.status(200).json(result);
+
+  } catch (error) {
+    console.log(error, 'Data Error');
+    res.status(500).json({
+      success: false,
+      message: 'Internal Server Error',
+      data: null
+    });
+  }
+};
+
+const add_ulasan_wisata = async (req, res) => {
+  try {
+    let id_wisatawan;
+
+    const token = req.cookies.refreshtoken;
+
+    if (!token) {
+      return res.status(401).json({ msg: "Akun Belum Login!", token });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    id_wisatawan = decoded.id;
+
+    const { id_wisata } = req.params;
+
+    if (!id_wisata) {
+      return res.status(400).send({ error: "id_wisata is required" });
+    }
+
+    const data = await tbl_Wisata.findOne({
+      where: {
+        id_wisata,
+      },
+    });
+
+    if (!data) {
+      return res.status(422).json({
+        success: false,
+        message: "Data Tidak Ditemukan",
+        data: null
+      });
+    }
+
+    const {
+      id_pesanan,
+      rate,
+      komentar
+    } = req.body;
+
+    const dataUlasanExits = await tbl_ulasan.findOne({
+      where: {
+        id_wisata: id_wisata,
+        id_pesanan: id_pesanan,
+        id_wisatawan: id_wisatawan
+      },
+    });
+
+    if (dataUlasanExits) {
+      return res.status(422).json({
+        success: false,
+        message: "Ulasan Anda sudah ditambahkan pada wisata ini",
+        data: null
+      });
+    }
+
+    const currentDateTime = moment().tz("Asia/Jakarta").format("YYYY-MM-DD HH:mm:ss");
+
+    const add_ulasan = await tbl_ulasan.create({
+      id_wisatawan: id_wisatawan,
+      id_pesanan: id_pesanan,
+      id_wisata: id_wisata,
+      rate: rate,
+      komentar: komentar,
+      createdAt: currentDateTime,
+      updatedAt: currentDateTime
+    });
+
+    if (!add_ulasan) {
+      return res.status(422).json({
+        status: 'error',
+        success: false,
+        message: "Ulasan gagal ditambahkan",
+      });
+    }
+
+    //update untuk rating pada data setelah ulasan terbaru ditambah
+    const allReviews = await tbl_ulasan.findAll({
+      where: { id_wisata },
+    });
+
+    const totalRating = allReviews.reduce((sum, review) => sum + review.rate, 0);
+    const averageRating = totalRating / allReviews.length;
+
+    await data.update({
+      rate: averageRating || data.averageRating,
+    });
+
+    return res.status(200).json({
+      status: "success",
+      success: true,
+      message: "Ulasan berhasil ditambahkan",
+      data: add_ulasan
+    });
+
+
+  } catch (error) {
+    console.log(error, 'Data Error');
+    res.status(500).json({
+      success: false,
+      message: 'Internal Server Error',
+      data: null
+    });
+  }
+};
+
+const get_ulasan_wisata = async (req, res) => {
+  try {
+    const { id_wisata } = req.params;
+
+    if (!id_wisata) {
+      return res.status(400).send({ error: "id_wisata is required" });
+    }
+
+    const {
+      keyword = '',
+    } = req.query;
+
+    const whereClause = {
+      [Op.and]: [
+        { id_wisata: id_wisata },
+        keyword ? {
+          [Op.or]: [
+            { rate: { [Op.like]: `%${keyword}%` } },
+          ]
+        } : {}
+      ]
+    };
+
+    const data = await tbl_ulasan.findAndCountAll({
+      where: whereClause,
+    });
+
+    if (data.count === 0) {
+      return res.status(422).json({
+        success: false,
+        message: "Data Tidak Ditemukan",
+        data: null
+      });
+    }
+
+    const results = await Promise.all(data.rows.map(async (wisata) => {
+      let detail_wisatawan = [];
+
+      detail_wisatawan = await tbl_wisatawan.findOne({
+        where: { id_wisatawan: wisata.id_wisatawan },
+        attributes: [
+          "id_wisatawan",
+          "name",
+          "profile"
+        ]
+      });
+
+
+      return {
+        detail_wisatawan,
+        rate: wisata.rate,
+        ulasan: wisata.komentar,
+        createdAt: wisata.createdAt,
+        updatedAt: wisata.updatedAt
+      };
+    }));
+
+    return res.status(200).json({
+      status: 200,
+      success: true,
+      message: "Data Desa Wisata",
+      data: results
+    });
 
   } catch (error) {
     console.log(error, 'Data Error');
@@ -1588,7 +1875,7 @@ const add_fasilitas_wisata_byAdmin = async (req, res) => {
         await fasilitas.destroy();
       }
     }
-    
+
     let add_data = []
 
     for (let row of valueFasilitas) {
@@ -1653,6 +1940,8 @@ module.exports = {
   get_recomendasi_wisata,
   get_detail_wisata,
   get_all_wisata_byDesawisata,
+  add_ulasan_wisata,
+  get_ulasan_wisata,
 
   //admin
   get_all_wisata_byAdmin,

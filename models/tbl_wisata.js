@@ -78,11 +78,17 @@ module.exports = (sequelize, DataTypes) => {
     jumlah_fasilitas: {
       type: DataTypes.INTEGER,
     },
+    rate: {
+      type: DataTypes.DOUBLE(10, 2),
+    },
     kontak_person_destinasi: {
       type: DataTypes.STRING
     },
     status_wisata: {
       type: DataTypes.ENUM('Pribadi', 'Bumdes', 'Pemda'),
+    },
+    jenis_wisata: {
+      type: DataTypes.ENUM('buatan', 'alam', 'religi', 'senibudaya'),
     },
     status_verifikasi: {
       type: DataTypes.ENUM('verifed', 'unverifed'),
@@ -97,7 +103,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'tbl_Wisata',
-    tableName: 'tbl_Wisata',
+    tableName: 'tbl_wisata',
   });
   return tbl_Destinasi;
 };

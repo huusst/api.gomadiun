@@ -58,7 +58,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'tbl_Admin',
-    tableName: 'tbl_Admin',
+    tableName: 'tbl_admin',
   });
   return tbl_Admin;
 };

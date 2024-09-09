@@ -35,9 +35,8 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({
     storage: storage,
     fileFilter: fileFilter,
-    limits: { fileSize: 300 * 1024 * 1024 }, // Limit file size to 300MB
+    limits: { fileSize: 300 * 1024 * 1024 },
 });
-
 
 const get_all_superAdmin = async (req, res) => {
     try {

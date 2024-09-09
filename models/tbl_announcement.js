@@ -3,7 +3,7 @@ const {
   Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class tbl_Produk extends Model {
+  class tbl_announcement extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -13,38 +13,32 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
     }
   }
-  tbl_Produk.init({
-    id_menu: {
+  tbl_announcement.init({
+    id_announcements: {
       allowNull: false,
       autoIncrement: true,
       primaryKey: true,
       type: DataTypes.INTEGER
     },
-    id_kuliner: {
-      type: DataTypes.INTEGER
-    },
-    id_kategori_menu: {
-      type: DataTypes.INTEGER
-    },
-    id_admin: {
-      type: DataTypes.INTEGER
-    },
-    nama_menu: {
+    judul_event: {
       type: DataTypes.STRING
     },
-    harga_menu: {
-      type: DataTypes.INTEGER
-    },
-    sampul_menu: {
+    url_poster: {
       type: DataTypes.STRING
     },
-    status_tersedia: {
-      type: DataTypes.ENUM('tersedia', 'habis'),
+    name_poster: {
+      type: DataTypes.STRING
+    },
+    desk_event: {
+      type: DataTypes.TEXT
+    },
+    url_announcements: {
+      type: DataTypes.STRING
     },
   }, {
     sequelize,
-    modelName: 'tbl_Menu',
-    tableName: 'tbl_menu',
+    modelName: 'tbl_announcement',
+    tableName: 'tbl_announcement',
   });
-  return tbl_Produk;
+  return tbl_announcement;
 };

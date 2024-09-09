@@ -3,55 +3,42 @@ const {
   Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class tbl_Kamar extends Model {
+  class tbl_ulasan extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      tbl_Kamar.hasMany(models.tbl_Gallery, {
-        foreignKey: 'id_table',
-        sourceKey: 'id_kamar',
-        as: "kamar_gallery_as",
-      });
+      // define association here
     }
   }
-  tbl_Kamar.init({
-    id_kamar: {
+  tbl_ulasan.init({
+    id_ulasan: {
       allowNull: false,
       autoIncrement: true,
       primaryKey: true,
       type: DataTypes.INTEGER
     },
-    id_penginapan: {
+    id_wisatawan: {
       type: DataTypes.INTEGER
     },
-    nama_kamar: {
-      type: DataTypes.STRING
+    id_pesanan: {
+      type: DataTypes.INTEGER
     },
-    deskripsi: {
+    id_wisata: {
+      type: DataTypes.INTEGER
+    },
+    rate: {
+      type: DataTypes.INTEGER
+    },
+    komentar: {
       type: DataTypes.TEXT
-    },
-    harga: {
-      type: DataTypes.INTEGER
-    },
-    kapasitas: {
-      type: DataTypes.INTEGER
-    },
-    jumlah_kamar: {
-      type: DataTypes.INTEGER
-    },
-    bebas_rokok: {
-      type: DataTypes.ENUM('true', 'false'),
-    },
-    fasilitas_sarapan: {
-      type: DataTypes.ENUM('true', 'false'),
     },
   }, {
     sequelize,
-    modelName: 'tbl_Kamar',
-    tableName: 'tbl_kamar',
+    modelName: 'tbl_ulasan',
+    tableName: 'tbl_ulasan',
   });
-  return tbl_Kamar;
+  return tbl_ulasan;
 };

@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require("express");
 const app = express();
-// const database = require("./models");
+const database = require("./models");
 const route = require('./routes/route');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
@@ -50,6 +50,7 @@ app.use('/uploads/img/kuliner', express.static('uploads/img/kuliner'));
 app.use('/uploads/img/penginapan', express.static('uploads/img/penginapan'));
 app.use('/uploads/img/penginapan/gallery', express.static('uploads/img/penginapan/gallery'));
 app.use('/uploads/img/menu', express.static('uploads/img/menu'));
+app.use('/uploads/img/banerInfo', express.static('uploads/img/banerInfo'));
 
 app.listen(process.env.PORT, () => {
   console.log(`Server running on port ${process.env.PORT}`);
